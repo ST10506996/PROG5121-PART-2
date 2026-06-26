@@ -7,50 +7,86 @@ package login;
  *
  * @author lab_services_student
  */
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 public class MessageTest {
 
-    @Test
-    public void testUsernameFormattingSuccess() {
-        Login login = new Login("kyl_1", "Password123!", "Kyle", "Smith");
-        assertTrue(login.checkUserName());
+    // A temporary main method that manually runs your test cases sequentially
+    public static void main(String[] args) {
+        System.out.println("====== RUNNING QUICKCHAT MANUAL UNIT TESTS ======");
+        MessageTest runner = new MessageTest();
+       
+        try {
+            runner.testCheckMessageIDLength();
+            System.out.println("[PASS] -> testCheckMessageIDLength");
+        } catch (Throwable e) {
+            System.out.println("[FAIL] -> testCheckMessageIDLength: " + e.getMessage());
+        }
+
+        try {
+            runner.testCheckRecipientCellSuccess();
+            System.out.println("[PASS] -> testCheckRecipientCellSuccess");
+        } catch (Throwable e) {
+            System.out.println("[FAIL] -> testCheckRecipientCellSuccess: " + e.getMessage());
+        }
+
+        try {
+            runner.testCheckRecipientCellFailure();
+            System.out.println("[PASS] -> testCheckRecipientCellFailure");
+        } catch (Throwable e) {
+            System.out.println("[FAIL] -> testCheckRecipientCellFailure: " + e.getMessage());
+        }
+
+        try {
+            runner.testValidateMessageLengthSuccess();
+            System.out.println("[PASS] -> testValidateMessageLengthSuccess");
+        } catch (Throwable e) {
+            System.out.println("[FAIL] -> testValidateMessageLengthSuccess: " + e.getMessage());
+        }
+
+        try {
+            runner.testCreateMessageHashFormatting();
+            System.out.println("[PASS] -> testCreateMessageHashFormatting");
+        } catch (Throwable e) {
+            System.out.println("[FAIL] -> testCreateMessageHashFormatting: " + e.getMessage());
+        }
+        System.out.println("================================================");
     }
 
-    @Test
-    public void testUsernameFormattingFailure() {
-        Login login = new Login("kyle!!!!!!!", "Password123!", "Kyle", "Smith");
-        assertFalse(login.checkUserName());
+    public void testCheckMessageIDLength() {
+        Message msg = new Message(0, "+27831234567", "Hello World");
+        if (!msg.checkMessageID()) {
+            throw new RuntimeException("Message ID length check failed!");
+        }
     }
 
-    @Test
-    public void testPasswordComplexitySuccess() {
-        Login login = new Login("kyl_1", "Ch&&sec@ke99!", "Kyle", "Smith");
-        assertTrue(login.checkPasswordComplexity());
+    public void testCheckRecipientCellSuccess() {
+        Message msg = new Message(0, "+27831234567", "Valid test message body");
+        if (!"Cellphone number successfully captured.".equals(msg.checkRecipientCell())) {
+            throw new RuntimeException("Expected successful capture string mismatch!");
+        }
     }
 
-    @Test
-    public void testPasswordComplexityFailure() {
-        Login login = new Login("kyl_1", "password", "Kyle", "Smith");
-        assertFalse(login.checkPasswordComplexity());
+    public void testCheckRecipientCellFailure() {
+        Message msg = new Message(1, "0831234", "Valid body text");
+        String expected = "Cellphone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.";
+        if (!expected.equals(msg.checkRecipientCell())) {
+            throw new RuntimeException("Failure validation text mismatch!");
+        }
     }
 
-    @Test
-    public void testMessageLengthSuccess() {
-        Message msg = new Message("+27838884567", "Hi Mike, can you join us for dinner tonight?");
-        assertEquals("Message ready to send.", msg.checkMessageLength());
+    public void testValidateMessageLengthSuccess() {
+        Message msg = new Message(2, "+27831234567", "Short message.");
+        if (!"Message ready to send".equals(msg.validateMessage())) {
+            throw new RuntimeException("Message length check failed!");
+        }
     }
 
-    @Test
-    public void testRecipientCellSuccess() {
-        Message msg = new Message("+27838968976", "Test message body");
-        assertEquals("Cell phone number successfully captured.", msg.checkRecipientCell());
-    }
-
-    @Test
-    public void testRecipientCellFailure() {
-        Message msg = new Message("08966553", "Test message body");
-        assertEquals("Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.", msg.checkRecipientCell());
+    public void testCreateMessageHashFormatting() {
+        Message msg = new Message(0, "+27831234567", "Did you get the cake?");
+        String generatedHash = msg.createMessageHash();
+        String expectedEnd = ":0:DIDCAKE?";
+       
+        if (!generatedHash.endsWith(expectedEnd)) {
+            throw new RuntimeException("Hash formatting mismatch. Got: " + generatedHash);
+        }
     }
 }

@@ -9,23 +9,22 @@ package login;
  */
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
 
-public class Message {
+public final class Message {
 
     public static int returnTotalMessagesStatic() {
         return totalMessages;
     }
    
     private String messageID;
-    private int messageNumber;
-    private String recipient;
-    private String message;
+    private final int messageNumber;
+    private final String recipient;
+    private final String message;
    
     private static int totalMessages = 0;
    
-    ArrayList<String> sentMessages = new ArrayList<>();
+
    
     // Constructor
     public Message(int messageNumber, String recipient, String message) {
@@ -85,31 +84,34 @@ public class Message {
     // Programmatic routing 
     public String processActionChoice(int choice) {
         switch (choice) {
-            case 1:
+            case 1 -> {
                 totalMessages++;
                 return "Message successfully sent.";
-            case 2:
-            case 0:
+            }
+            case 2, 0 -> {
                 return "Press 0 to delete message.";
-            case 3:
+            }
+            case 3 -> {
                 return storeMessages();
-            default:
+            }
+            default -> {
                 return "Invalid option selected.";
+            }
         }
     }
    
     public String storeMessages() {
         try {
-            FileWriter writer = new FileWriter("messages.json", true);
-            writer.write(
-                    "{\n"
-                    + "\"MessageID\": \"" + messageID + "\",\n"
-                    + "\"Recipient\": \"" + recipient + "\",\n"
-                    + "\"Message\": \"" + message + "\",\n"
-                    + "\"Hash\": \"" + createMessageHash() + "\"\n"
-                    + "}\n\n"
-            );
-            writer.close();
+            try (FileWriter writer = new FileWriter("messages.json", true)) {
+                writer.write(
+                        "{\n"
+                                + "\"MessageID\": \"" + messageID + "\",\n"
+                                        + "\"Recipient\": \"" + recipient + "\",\n"
+                                                + "\"Message\": \"" + message + "\",\n"
+                                                        + "\"Hash\": \"" + createMessageHash() + "\"\n"
+                                                                + "}\n\n"
+                );
+            }
             return "Message successfully stored.";
         } catch (IOException e) {
             return "Error storing message.";
